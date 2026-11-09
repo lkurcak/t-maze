@@ -3,7 +3,7 @@
 //! it, and for the quickest, mud and all, with Dijkstra's algorithm.
 
 use alloc::list::List;
-use core::num::{checked_add, greatest};
+use core::num::saturating_add;
 use core::slice::Iter;
 use graph::Graph;
 
@@ -67,7 +67,7 @@ pub fn search(
     let _ = rest.next();
     for v in rest {
         let (x, y) = maze.place(*v);
-        time = plus(time, maze.cost(x, y));
+        time = saturating_add(time, maze.cost(x, y));
     }
     let steps = if way.len() > 0 { way.len() - 1 } else { 0 };
     Found { kind, squares: graph.node_count(), far, way, steps, time }
@@ -78,10 +78,6 @@ pub fn search(
 pub fn plural(one: bool) -> &'static str {
     if one { "" } else { "s" }
 }
-
-/// `a + b`, or if that's more than a `u64` holds, the greatest one does:
-/// no maze takes that long, but the checker can't know that.
-pub fn plus(a: u64, b: u64) -> u64 { checked_add(a, b).unwrap_or(greatest()) }
 
 /// Checks that `way` goes from square `from` of `maze` to the way out, a
 /// step at a time, through passages.

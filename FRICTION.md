@@ -13,9 +13,13 @@ The log is evidence for t-lang's plans, not a design for them.
 
 Written against `t` 0.76.0, the first release with refinements inside
 type arguments of any type (`List<{ p: usize | p < n }>`), which most of
-this program leans on.
+this program leans on. Entries say what 0.77.0 fixed.
 
 ## The checker takes minutes on one method — gap
+
+**Fixed in t 0.77.0** (t-lang step 61: backjumping, facts said once,
+carried refinements flattened). `Game::search` is one method again, and
+the whole program checks in about half a second.
 
 `play.t`'s `Game::search` was first one method: search, then a loop that
 draws a frame and waits for the next or a key, which `break`s; then
@@ -32,6 +36,10 @@ the `break`, or the call, it's 0.25 s. Something there, maybe joining the
 loop's two exits, is exponential in the facts that mention the product.
 
 ## An enum of refined pairs: 512 cases, or two minutes — gap
+
+**Fixed in t 0.77.0**: the repro below checks in a quarter of a second,
+with the extra facts too. The maze still numbers its squares, which is
+what the union-find works on anyway.
 
 Kruskal's algorithm wants the walls in one list, to shuffle. A wall is
 east or south of a square, and which squares can have one differs:
@@ -60,6 +68,11 @@ wall as `(a, b, east)`: the two squares, both `< n`, and which way.
 
 ## A `&mut` to a refined list can't be lent to `set` — gap
 
+**Fixed in t 0.77.0**: what a refined `&mut` points to, and a refined
+`let`, are proved again after a call they're lent to straight, from what
+it ensures; `push` fails with "can't prove `l.len() == n` for `*l` after
+the call to `push`". `Parts` stays: it reads better.
+
 The union-find was first two functions over a list:
 
 ```text
@@ -84,6 +97,10 @@ struct Parts { parent: List<{ p: usize | p < parent.len() }> }
 
 ## A product in scope breaks other proofs — gap
 
+**Fixed in t 0.77.0**: a constraint whose numbers don't fit is left out
+of a proof, not the end of it. `number()` stays, as the name of the
+numbering.
+
 ```text
 for y in 0..height {
     for x in 0..width {
@@ -99,6 +116,9 @@ same way. `maze.t` has a function for it, `number(width, height, n, x, y)
 
 ## A pattern forgets a refined reference's refinement — gap
 
+**Fixed in t 0.77.0**, the `for` head too: `draw::lights`' invariant no
+longer says `n == f.squares` again.
+
 ```text
 fn a(n: usize, found: Option<&{ f: Found | f.squares == n }>, ..) {
     let Some(f) = found else { return 0 };
@@ -112,6 +132,9 @@ fact is known after the `let`, but the `for`'s head forgets it, so its
 invariant says it again.
 
 ## Nothing, and an empty list, aren't known to hold nothing — gap
+
+**Fixed in t 0.77.0**, through joins of branches and through a `let`
+that declares a refinement of an empty list's elements.
 
 ```text
 let found = match g.cheapest_path(from, to, |w| *w) {
@@ -147,14 +170,18 @@ t-libs' graph findings).
 
 ## Small gaps
 
-- No `Iterator::skip`: `let _ = rest.next();` before the `for`.
+- No `Iterator::skip`: `let _ = rest.next();` before the `for`. 0.77.0
+  has `skip`, but an iterator adapter doesn't carry what's known of its
+  values (they come through `I::Item`), so `way.iter().skip(1)` gives
+  squares that aren't known to be nodes: `search.t` still does it by hand.
 - No `saturating_add` for integers (`Duration` has one): `search::plus`.
+  0.77.0 has `core::num::saturating_add`; `plus` is gone.
 - An f-string is a `Display`, not a `&str`, so a function wanting a `&str`
   gets `String::of(&f"..").as_str()`. Fine, once known.
 - No `#[cfg(test)]`: test helpers (`maze::some`, `passages`) are in the
   program. No warning says so, so it doesn't matter yet.
 - `t fmt --check ./*.t | head` panics in `t` when `head` closes the pipe
-  ("failed printing to stdout: Broken pipe").
+  ("failed printing to stdout: Broken pipe"). Fixed in 0.77.0.
 - No exit code: a bad command line prints usage to stderr and exits 0.
 
 ## A second copy of keys and random numbers — unsure

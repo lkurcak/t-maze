@@ -44,9 +44,7 @@ pub fn lights(
     let n = maze.squares();
     let mut lit = List::filled(n, Lit::Dark);
     let Some(f) = found else { return lit };
-    // `f.squares == n`, as `found` says, and it's known here; but the
-    // loop's head forgets it, so its invariant says it again (FRICTION.md).
-    for v in 0..n invariant lit.len() == n && n == f.squares {
+    for v in 0..n invariant lit.len() == n {
         if let Some(d) = f.far[v] {
             if d <= upto {
                 lit.set(v, if d > since { Lit::Edge } else { Lit::Seen });

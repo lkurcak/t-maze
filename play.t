@@ -3,7 +3,7 @@
 
 use alloc::string::String;
 use core::fmt::Write;
-use core::num::checked_mul;
+use core::num::{checked_mul, saturating_add};
 use core::time::Duration;
 use graph::Graph;
 use std::io::{Error, Raw, Size, Stdout};
@@ -13,7 +13,7 @@ use crate::draw::{self, Lit};
 use crate::keys::{self, Key};
 use crate::maze::Maze;
 use crate::rng::Rng;
-use crate::search::{self, plural, plus, Found, Kind};
+use crate::search::{self, plural, Found, Kind};
 use alloc::list::List;
 
 /// How many frames a search takes to reach the way out, and how long each
@@ -123,8 +123,8 @@ impl Game {
                     let (x, y) = self.maze.place(self.you);
                     if let Some((x, y)) = self.maze.step(x, y, d) {
                         self.you = self.maze.number(x, y);
-                        self.steps = plus(self.steps, 1);
-                        self.time = plus(self.time, self.maze.cost(x, y));
+                        self.steps = saturating_add(self.steps, 1);
+                        self.time = saturating_add(self.time, self.maze.cost(x, y));
                         self.found = None;
                         if self.you == self.maze.exit() {
                             return self.out(out, raw, clock);
@@ -149,8 +149,9 @@ impl Game {
     }
 
     /// Searches from where you are for the way `kind` says, showing it
-    /// spread out, then the way it found, until you take a step: `false`
-    /// if a key said to stop.
+    /// spread out a frame at a time until it reaches the way out, then the
+    /// way it found, until you take a step: `false` if a key said to stop.
+    /// A key stops the spreading.
     fn search(
         &mut self,
         out: &mut Stdout,
@@ -159,27 +160,13 @@ impl Game {
         kind: Kind,
     ) -> Result<bool, Error> {
         let found = search::search(&self.maze, &self.graph, self.you, kind);
-        let go_on = self.spread(out, raw, clock, &found)?;
-        self.found = Some(found);
-        Ok(go_on)
-    }
-
-    /// Shows `found` spread out from where you are, a frame at a time,
-    /// until it reaches the way out. A key stops it: `false` if it said to
-    /// stop.
-    fn spread(
-        &self,
-        out: &mut Stdout,
-        raw: &mut Raw<'_>,
-        clock: Clock,
-        found: &{ f: Found | f.squares == self.maze.width() * self.maze.height() },
-    ) -> Result<bool, Error> {
         // How far the way out is: the search is done when it gets there.
         let top = found.far[self.maze.exit()].unwrap_or(0);
         // The squares it reached in the last `band` are its edge.
         let band = top / 32 + 1;
         let line = String::of(&f"Searching for {about(found.kind)}...");
         let start = clock.now();
+        let mut go_on = true;
         let mut k: u64 = 1;
         while k <= FRAMES {
             let upto = match checked_mul(top, k) {
@@ -187,14 +174,16 @@ impl Game {
                 None => top,
             };
             let since = if upto > band { upto - band } else { 0 };
-            let lit = draw::lights(&self.maze, Some(found), upto, since, false);
+            let lit = draw::lights(&self.maze, Some(&found), upto, since, false);
             self.show(out, &lit, line.as_str(), HELP)?;
             if raw.wait(start.add(Duration::from_millis(k * FRAME_MS)))? {
-                return Ok(keys::read(raw, clock)? != Key::Quit);
+                go_on = keys::read(raw, clock)? != Key::Quit;
+                break;
             }
             k = k + 1;
         }
-        Ok(true)
+        self.found = Some(found);
+        Ok(go_on)
     }
 
     /// You're out: says how quick that was, against the quickest way,
