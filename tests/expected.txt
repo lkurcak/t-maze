@@ -1,0 +1,94 @@
+$ maze 12 6 42
+A maze 12 squares wide and 6 high, from seed 42.
+#########################
+#@#~  #ooooO#OoooOOOOO# #
+#o#~# #o# #o#o###~###o# #
+#OOOoooo# #ooo# #~~~#ooo#
+#~##### ### ### ### # #o#
+#~#~    #~#~~~  #   # #o#
+# # # # # ### ### # ###o#
+#     #   #     # #   #o#
+# ### # # ### ##### ###o#
+#     #~          # # #o#
+# ####### ### # # ### #o#
+#  ~~~  # #   # #   #  E#
+#########################
+The fewest steps: 20, taking 41.
+#########################
+#@#~  #ooooO#OoooOOOOO# #
+#o#~# #o# #o#o###~###o# #
+#OOOoooo# #ooo# #~~~#ooo#
+#~##### ### ### ### # #o#
+#~#~    #~#~~~  #   # #o#
+# # # # # ### ### # ###o#
+#     #   #     # #   #o#
+# ### # # ### ##### ###o#
+#     #~          # # #o#
+# ####### ### # # ### #o#
+#  ~~~  # #   # #   #  E#
+#########################
+The quickest way: 20 steps, taking 41.
+$ maze 20 8 5
+A maze 20 squares wide and 8 high, from seed 5.
+#########################################
+#@oO#~      #     #    ~~~~~  #       # #
+###O### # ####### #####~###~# ##### ### #
+#~~O~~# #   # #      ~#~~~#~# # #    ~#~#
+# #o### ### # ##### ###~###~### ### #~#~#
+# #o   ~#~~~         ~#~~~~~#~  # # #~#~#
+###o############# ### #####~### # # ###~#
+# #ooooOOOOO#       #  ~#OOOOOOOoooooo#~#
+# # ###~#~#O# ### # #####O#####~# # #o# #
+# #   #~#~#O#   # # # #ooO~~#~~~#   #o  #
+# ### #####o##### # # #o# #~##### ###o# #
+#    ~#~#~#ooooooo#  ooo  #~#~~~    #o# #
+# ###~# #~# # ###o###o# ######### ###o###
+#   #~  #~  # #  ooooo  #           #o  #
+# ### ####### # ##### ######### # # #o###
+# #   #  ~    # #       #           #ooE#
+#########################################
+The fewest steps: 32, taking 65.
+#########################################
+#@oO#~ ooo  #     #    ~~~~~  #       # #
+###O###o#o####### #####~###~# ##### ### #
+#~~O~~#o#ooo# #      ~#~~~#~# # #    ~#~#
+# #o###o###o# ##### ###~###~### ### #~#~#
+# #ooooO#~~Ooooooo   ~#~~~~~#~  # # #~#~#
+### #############o### #####~### # # ###~#
+# #    ~~~~~#    ooo#  ~#OOOOOOOoooooo#~#
+# # ###~#~#~# ### #o#####O#####~# # #o# #
+# #   #~#~#~#   # #o# #ooO~~#~~~#   #o  #
+# ### ##### ##### #o# #o# #~##### ###o# #
+#    ~#~#~#       #ooooo  #~#~~~    #o# #
+# ###~# #~# # ### ### # ######### ###o###
+#   #~  #~  # #         #           #o  #
+# ### ####### # ##### ######### # # #o###
+# #   #  ~    # #       #           #ooE#
+#########################################
+The quickest way: 34 steps, taking 61.
+$ maze 1 1 7
+A maze 1 squares wide and 1 high, from seed 7.
+###
+#@#
+###
+The fewest steps: 0, taking 0.
+###
+#@#
+###
+The quickest way: 0 steps, taking 0.
+$ maze 5 1 9
+A maze 5 squares wide and 1 high, from seed 9.
+###########
+#@oooooooE#
+###########
+The fewest steps: 4, taking 4.
+###########
+#@oooooooE#
+###########
+The quickest way: 4 steps, taking 4.
+$ maze 0 4 1
+A maze has at least one square each way.
+$ maze 3 x
+usage: maze [WIDTH HEIGHT [SEED]], each a whole number, WIDTH and HEIGHT at least 1
+$ maze 1 2 3 4
+usage: maze [WIDTH HEIGHT [SEED]], each a whole number, WIDTH and HEIGHT at least 1
