@@ -158,6 +158,7 @@ Twice: `let mut v = v;` in `Parts::root`, which needs `v < n` for
 mut rest = way.iter();`, to skip the first square of a way, whose items
 then aren't nodes any more (written with the iterator's type in full).
 t-lang's docs/60 says so: a `let mut` declares only what the type says.
+(The second is `way.iter().skip(1)` since t 0.79.0, with no `let`.)
 
 ## A square can't know where it is — by design
 
@@ -174,6 +175,8 @@ t-libs' graph findings).
   has `skip`, but an iterator adapter doesn't carry what's known of its
   values (they come through `I::Item`), so `way.iter().skip(1)` gives
   squares that aren't known to be nodes: `search.t` still does it by hand.
+  Fixed in t 0.79.0: adapters carry what a type argument says of their
+  items, and `search.t` is `for v in way.iter().skip(1)`.
 - No `saturating_add` for integers (`Duration` has one): `search::plus`.
   0.77.0 has `core::num::saturating_add`; `plus` is gone.
 - An f-string is a `Display`, not a `&str`, so a function wanting a `&str`

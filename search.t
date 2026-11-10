@@ -4,7 +4,6 @@
 
 use alloc::list::List;
 use core::num::saturating_add;
-use core::slice::Iter;
 use graph::Graph;
 
 use crate::maze::Maze;
@@ -63,9 +62,7 @@ pub fn search(
     // How long the way takes: each step onto a square takes what that
     // square costs. The first square is where it starts from.
     let mut time: u64 = 0;
-    let mut rest: Iter<{ v: usize | v < graph.node_count() }> = way.iter();
-    let _ = rest.next();
-    for v in rest {
+    for v in way.iter().skip(1) {
         let (x, y) = maze.place(*v);
         time = saturating_add(time, maze.cost(x, y));
     }
