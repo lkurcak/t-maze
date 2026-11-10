@@ -12,9 +12,10 @@ use std::time::Clock;
 use crate::draw::{self, Lit};
 use crate::keys::{self, Key};
 use crate::maze::Maze;
-use crate::rng::Rng;
 use crate::search::{self, plural, Found, Kind};
 use alloc::list::List;
+use rand::Rng;
+use term::Screen;
 
 /// How many frames a search takes to reach the way out, and how long each
 /// is shown, in milliseconds.
@@ -23,28 +24,6 @@ const FRAME_MS: u64 = 30;
 
 /// What the keys do, under the maze.
 const HELP: &str = "arrows or hjkl: walk   b: fewest steps   d: quickest   n: new maze   q: quit";
-
-/// The terminal's other screen, which a program that draws on the whole
-/// terminal uses, so that what was there before is there again after;
-/// with the cursor hidden. Dropping it goes back to the first screen.
-struct Screen<'a> { out: &'a mut Stdout }
-
-impl<'a> Screen<'a> {
-    /// Goes to the other screen, and clears it.
-    fn enter(out: &'a mut Stdout) -> Result<Screen<'a>, Error> {
-        out.put("\u{1b}[?1049h\u{1b}[?25l\u{1b}[2J")?;
-        Ok(Screen { out })
-    }
-}
-
-/// Shows the cursor again, and goes back to the first screen. If that
-/// fails, the terminal's gone, and there's nothing to go back to.
-impl<'a> Discard for Screen<'a> {
-    fn discard(self) {
-        let _ = self.out.put("\u{1b}[0m\u{1b}[?25h\u{1b}[?1049l");
-        let _ = self.out.flush();
-    }
-}
 
 /// Plays mazes on the terminal until you quit: each `size` squares, if
 /// that's given, or as big as fits. Keys come from `raw`, and `clock`
@@ -56,15 +35,15 @@ pub fn play(
     rng: &mut Rng,
     size: Option<(usize, usize)>,
 ) -> Result<(), Error> {
-    let screen = Screen::enter(out)?;
+    let mut screen = Screen::enter(out)?;
     loop {
         let (width, height) = match size {
             Some(s) => s,
-            None => fit(screen.out.size()?),
+            None => fit(screen.out().size()?),
         };
         if width == 0 || height == 0 {
-            screen.out.put("The terminal's too small for a maze; any key to stop.")?;
-            screen.out.flush()?;
+            screen.out().put("The terminal's too small for a maze; any key to stop.")?;
+            screen.out().flush()?;
             let _ = keys::read(raw, clock)?;
             return Ok(());
         }
@@ -72,8 +51,8 @@ pub fn play(
         let graph = maze.graph();
         let you = maze.start();
         let mut game = Game { maze, graph, you, steps: 0, time: 0, found: None };
-        screen.out.put("\u{1b}[2J")?;
-        if !game.play(screen.out, raw, clock)? {
+        screen.clear()?;
+        if !game.play(screen.out(), raw, clock)? {
             return Ok(());
         }
     }

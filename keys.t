@@ -1,18 +1,15 @@
-//! Keys, read one at a time from the terminal in raw mode. An arrow comes
-//! as three bytes, escape, `[` and a letter; escape on its own, with
-//! nothing after it for a moment, is the escape key.
+//! What the keys do, from t-libs' `term`, which reads them.
 
-use core::io::Read;
-use core::time::Duration;
-use std::io::{Error, ErrorKind, Raw};
+use std::io::{Error, Raw};
 use std::time::Clock;
+use term::Key::{self as Pressed, Char, Ctrl};
 
 use crate::maze::Dir;
 
 /// What a key says to do.
 #[derive(Copy, Discard, Eq)]
 pub enum Key {
-    /// Take a step.
+    /// Take a step: an arrow, or `k`, `j`, `l` or `h`, as in vi.
     Go(Dir),
     /// Search for the way with the fewest steps: `b`, for breadth first.
     Fewest,
@@ -25,48 +22,17 @@ pub enum Key {
     Other,
 }
 
-/// The next key pressed.
+/// What the next key pressed says to do.
 pub fn read(raw: &mut Raw<'_>, clock: Clock) -> Result<Key, Error> {
-    Ok(
-        match byte(raw)? {
-            // Escape: an arrow, if the rest of one comes at once.
-            27 => {
-                if !raw.wait(clock.now().add(Duration::from_millis(30)))? {
-                    return Ok(Key::Quit);
-                }
-                if byte(raw)? != 91 {
-                    return Ok(Key::Other);
-                }
-                match byte(raw)? {
-                    65 => Key::Go(Dir::Up),
-                    66 => Key::Go(Dir::Down),
-                    67 => Key::Go(Dir::Right),
-                    68 => Key::Go(Dir::Left),
-                    _ => Key::Other,
-                }
-            },
-            // `k`, `j`, `l` and `h`, as in vi.
-            107 => Key::Go(Dir::Up),
-            106 => Key::Go(Dir::Down),
-            108 => Key::Go(Dir::Right),
-            104 => Key::Go(Dir::Left),
-            // `b` and `d`.
-            98 => Key::Fewest,
-            100 => Key::Quickest,
-            // `n`.
-            110 => Key::New,
-            // `q`, or Ctrl-C, which in raw mode is a key like any other.
-            113 | 3 => Key::Quit,
-            _ => Key::Other,
-        },
-    )
-}
-
-/// The next byte of input.
-fn byte(raw: &mut Raw<'_>) -> Result<u8, Error> {
-    let mut b = [0u8; 1];
-    if raw.read(b.as_mut_slice())? == 0 {
-        return Err(Error::new(ErrorKind::UnexpectedEnd));
-    }
-    Ok(b[0])
+    Ok(match term::read(raw, clock)? {
+        Pressed::Up | Char('k') => Key::Go(Dir::Up),
+        Pressed::Down | Char('j') => Key::Go(Dir::Down),
+        Pressed::Right | Char('l') => Key::Go(Dir::Right),
+        Pressed::Left | Char('h') => Key::Go(Dir::Left),
+        Char('b') => Key::Fewest,
+        Char('d') => Key::Quickest,
+        Char('n') => Key::New,
+        Char('q') | Ctrl('c') | Pressed::Escape => Key::Quit,
+        _ => Key::Other,
+    })
 }

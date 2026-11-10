@@ -3,13 +3,14 @@
 A terminal maze game written in T, the language at `~/repos/tooling/t-lang`
 (GitHub: lkurcak/t-lang). Like tcalc, t-libs and t-nonograms, part of its
 purpose is to find out what using T is like, here for an interactive,
-animated program over t-libs' `graph` and `grid`.
+animated program over t-libs' `graph` and `grid` (and `term` for keys
+and the other screen, `rand` for random numbers).
 
 - `main.t` is the program's root: the command line, and text output when
   it isn't on a terminal. Modules: `maze` (`Maze`, Kruskal + union-find,
   `graph()`), `search` (the graph's searches as `Found`), `draw` (the
   picture, in colour or as text), `play` (the game: raw mode, the other
-  screen, frames), `keys`, `rng`.
+  screen, frames), `keys` (what each key does).
 - Nothing in it panics: `#![warn(implicit_panics)]` with `--deny-warnings`.
   Keep it so; a test may `#[allow(implicit_panics)]`.
 - `tests/run.sh` runs what CI runs: `t check --deny-warnings`, `t fmt
