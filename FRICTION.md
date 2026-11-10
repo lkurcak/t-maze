@@ -184,12 +184,17 @@ t-libs' graph findings).
   ("failed printing to stdout: Broken pipe"). Fixed in 0.77.0.
 - No exit code: a bad command line prints usage to stderr and exits 0.
 
-## A second copy of keys and random numbers — unsure
+## A second copy of keys and random numbers — unsure (done: t-libs)
 
 `keys.t` is t-nonograms' key reader again, with other keys, and `rng.t`
 its SplitMix64. That's two programs with each: the rule of two says a
 library now (t-libs: `term` for keys and the other-screen guard, `rand`
-with `below(n) -> { r | r < n }`). Not done here.
+with `below(n) -> { r | r < n }`).
+
+**Done** (t-libs `term` and `rand`): `keys.t` is only what each key does,
+a `match` on `term::Key` (`Char('q') | Ctrl('c') | Escape => Quit`), and
+`rng.t` is gone. `Maze::new`'s `loops` became `{ l: u64 | l <= 100 }`, as
+`rand`'s `chance` asks; `LOOPS`, a `const`, is proved to be.
 
 ## What worked — works
 

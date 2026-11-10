@@ -95,7 +95,8 @@ def main():
     check("it searched for the quickest way", any("Searching for the quickest way" in f for f in shown))
     check("a new maze starts afresh", "Steps 0, time 0." in shown[-1])
     # A maze two squares wide and one high: one step east is the way out.
-    text, status, _, after = play([exe, "2", "1", "3"], [right, "q"])
+    # Then escape, on its own, quits.
+    text, status, _, after = play([exe, "2", "1", "3"], [right, ESC])
     check("it stopped cleanly", os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0)
     check("it said you're out", any("Out, in 1 step, taking 1." in f for f in frames(text)))
     check("the terminal's as it was", before == after)

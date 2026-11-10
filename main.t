@@ -20,14 +20,13 @@ use std::io::{Error, Stdout};
 use std::Os;
 
 use maze::Maze;
-use rng::Rng;
+use rand::Rng;
 use search::{Found, Kind};
 
 mod draw;
 mod keys;
 mod maze;
 mod play;
-mod rng;
 mod search;
 
 /// How many passages in a hundred, beyond those of a perfect maze, to

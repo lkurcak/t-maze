@@ -59,10 +59,12 @@ the checker proves every index and every bit of arithmetic in range.
 - `draw.t`: the picture, `2 * width + 1` places by `2 * height + 1`, each
   square, wall or passage two characters wide in colour, or one as text.
 - `play.t`: the game. The terminal's in raw mode (`std::io::Raw`) and on
-  its other screen, which a guard puts back when it's dropped; a search
+  its other screen (t-libs' `term::Screen`), which goes back when it's
+  dropped; a search
   spreads over 60 frames 30 ms apart, `raw.wait(deadline)` waiting for the
   next frame or a key, whichever comes first.
-- `keys.t`: reading keys, arrows included; `rng.t`: SplitMix64.
+- `keys.t`: what the keys do; t-libs' `term` reads them, arrows included.
+  Random numbers are t-libs' `rand`.
 
 ## Running it
 

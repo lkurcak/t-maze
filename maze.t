@@ -10,7 +10,7 @@ use core::ops::Range;
 use graph::Graph;
 use grid::Grid;
 
-use crate::rng::Rng;
+use rand::Rng;
 
 /// A square: is there a passage from it to the square east of it, and to
 /// the one south of it? And is it mud?
@@ -38,7 +38,7 @@ impl Maze {
         rng: &mut Rng,
         width: { w: usize | w > 0 },
         height: { h: usize | h > 0 },
-        loops: u64,
+        loops: { l: u64 | l <= 100 },
     ) -> Option<{ m: Maze | m.width() == width && m.height() == height }> with alloc {
         let blank = Square { east: false, south: false, mud: false };
         let mut squares = Grid::new(width, height, blank)?;
@@ -60,7 +60,7 @@ impl Maze {
                 }
             }
         }
-        shuffle(rng, &mut walls);
+        rng.shuffle(walls.as_mut_slice());
         let mut parts = Parts::new(n);
         for wall in walls.iter() {
             let (a, b, east) = *wall;
@@ -238,17 +238,6 @@ fn around(c: usize, n: { n: usize | c < n }) -> { r: Range<usize> | r.end() <= n
     start..end
 }
 
-/// Puts `l`'s values in a random order, each order as likely: the
-/// Fisher-Yates shuffle.
-fn shuffle<T>(rng: &mut Rng, l: &mut List<T>) {
-    let mut i = l.len();
-    while i > 1 invariant i <= l.len() {
-        let j = rng.below(i);
-        i = i - 1;
-        l.swap(i, j);
-    }
-}
-
 /// Squares joined into parts, as a forest: each square's parent, up to
 /// the root of its tree, which is its own parent. Each parent is one of
 /// the squares, so less than how many there are.
@@ -306,7 +295,7 @@ impl Parts {
 
 /// Mazes of a few sizes, from a few seeds, each with `loops` extra
 /// passages in a hundred.
-pub fn some(loops: u64) -> List<Maze> with alloc {
+pub fn some(loops: { l: u64 | l <= 100 }) -> List<Maze> with alloc {
     let mut mazes = List::new();
     let mut rng = Rng::new(1);
     for (w, h) in [(1usize, 1usize), (1, 7), (7, 1), (2, 2), (9, 4), (20, 10)].iter() {
