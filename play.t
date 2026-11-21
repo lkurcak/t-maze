@@ -90,11 +90,11 @@ impl Game {
         loop {
             let lit = draw::lights(&self.maze, self.found.as_ref(), 0, 0, true);
             let mut line = String::new();
-            line.put(&f"Steps {self.steps}, time {self.time}.").into_ok();
+            line.put(&f"Steps {self.steps}, time {self.time}.").unwrap();
             if let Some(f) = &self.found {
                 line.put(
                     &f"  From here, {about(f.kind)}: {f.steps} step{plural(f.steps == 1)}, taking {f.time}.",
-                ).into_ok();
+                ).unwrap();
             }
             self.show(out, &lit, line.as_str(), HELP)?;
             match keys::read(raw, clock)? {
@@ -174,13 +174,13 @@ impl Game {
         let mut line = String::new();
         line.put(
             &f"Out, in {self.steps} step{plural(self.steps == 1)}, taking {self.time}. ",
-        ).into_ok();
+        ).unwrap();
         if self.time <= best.time {
             line.push_str("That's as quick as it gets!");
         } else {
             line.put(
                 &f"The quickest way takes {best.time}, in {best.steps} step{plural(best.steps == 1)}.",
-            ).into_ok();
+            ).unwrap();
         }
         self.show(out, &lit, line.as_str(), "q: quit   any other key: another maze")?;
         Ok(keys::read(raw, clock)? != Key::Quit)
